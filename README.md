@@ -2,6 +2,10 @@
 
 This program converts Android XML layout into Scaloid layout.
 
+### Try this!
+
+http://layout.scaloid.org
+
 ## Project layout
 
 This project has a standard maven web application directory structure. We leverages Spring framework and Scala language.

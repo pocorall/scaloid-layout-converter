@@ -35,41 +35,21 @@
 
 <p>This program converts Android XML layout into Scaloid layout.</p>
 
-<c:if test="${! empty converted}">
-    The converted awesome-nice-great looking Scaloid layout is:
-    <div class="tabbable"> <!-- Only required for left/right tabs -->
-        <ul class="nav nav-tabs">
-            <li class="active"><a href="#tab1" data-toggle="tab">Converted Scaloid layout</a></li>
-            <li><a href="#tab2" data-toggle="tab">Original XML layout</a></li>
-        </ul>
-        <div class="tab-content">
-            <div class="tab-pane active" id="tab1">
-                <pre class="span10">
-                    ${converted}
-                </pre>
-            </div>
-            <div class="tab-pane" id="tab2">
 
-                <pre class="span10">
-                    ${original}
-                </pre>
-            </div>
-        </div>
-    </div>
-
-
-    <span class="label label-important"><i icon="icon-warning"></i> Currently, this converter is in Alpha stages. The conversion result may omit some properties from original XML layout. Please check the equality of the layout manually.</span>
-</c:if>
-
-<h4>Paste your legacy Android XML layout here: </h4>
+<h4>Paste Android XML layout here: </h4>
 
 <form action="index.do" method="post">
-<textarea name="source" class="span10" rows="10">
-
-</textarea> <br/>
+    <textarea name="source" class="span10" rows="10">${original}</textarea> <br/>
 
     <input type="submit" class="btn btn-primary"/>
 </form>
+
+
+Converted Scaloid layout is:<br/>
+
+<textarea class="span10" rows="10">${converted}</textarea> <br/>
+<span class="label label-important"><i icon="icon-warning"></i> Currently, this converter is in Alpha stages. The conversion result may omit some properties from original XML layout. Please check the equality of the layout manually.</span>
+
 
 <p>This project is currently in alpha stage. <a href="https://github.com/pocorall/scaloid-layout-converter">Fork this
     project on Github</a> and please help improve this!</p>
