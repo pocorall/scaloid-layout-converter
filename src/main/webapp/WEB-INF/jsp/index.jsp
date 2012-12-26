@@ -22,7 +22,7 @@
 <body>
 <h1>Scaloid Layout Converter</h1>
 
-<p>This program converts Android XML layout into Scaloid layout.</p>
+<p>This program converts Android XML layout into <a href="http://scaloid.org">Scaloid</a> layout.</p>
 
 
 <h4>Paste Android XML layout here: </h4>
@@ -34,11 +34,11 @@
 </form>
 
 
-Converted Scaloid layout is:<br/>
+Converted <a href="http://scaloid.org">Scaloid</a> layout is:<br/>
 
 <textarea class="span10" rows="10">${converted}</textarea> <br/>
-<span class="label label-important"><i icon="icon-warning"></i> Currently, this converter is in Alpha stages. The conversion result may omit some properties from the original XML.<br/>Please check the equality of the layout manually.</span>
-
+<span class="label label-important">Currently, this converter is in Alpha stages. The conversion result may omit some properties from the original XML.<br/>Please check the equality of the layout manually.</span>
+<br/>
 
 <p><a href="https://github.com/pocorall/scaloid-layout-converter">Fork this
     project on Github</a> and please help improve this!</p>
