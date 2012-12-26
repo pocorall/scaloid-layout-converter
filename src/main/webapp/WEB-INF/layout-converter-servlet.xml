@@ -26,8 +26,6 @@
 	</bean>
 
 	<!-- =============== DEFINITIONS OF VIEW RESOLVERS =============== -->
-	<bean id="specialViewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver" p:order="0"
-		p:basename="views" p:defaultParentView="pass/help" />
 
 
 	<bean id="typicalViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"

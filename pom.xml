@@ -17,31 +17,31 @@
 	<build>
 		<finalName>${project.artifactId}-${build.date}</finalName>
 		<pluginManagement>
-					<plugins>
-						<plugin>
-							<artifactId>maven-war-plugin</artifactId>
-							<version>2.1.1</version>
+			<plugins>
+				<plugin>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>2.1.1</version>
+					<configuration>
+						<classifier>test</classifier>
+						<webappDirectory>${project.build.directory}/${project.build.finalName}-test</webappDirectory>
+						<filteringDeploymentDescriptors>true</filteringDeploymentDescriptors>
+						<webXml>src/main/webapp/WEB-INF/web.xml</webXml>
+					</configuration>
+					<executions>
+						<execution>
+							<id>package-production</id>
+							<phase>package</phase>
 							<configuration>
-								<classifier>test</classifier>
-								<webappDirectory>${project.build.directory}/${project.build.finalName}-test</webappDirectory>
-								<filteringDeploymentDescriptors>true</filteringDeploymentDescriptors>
-								<webXml>src/main/webapp/WEB-INF/web.xml</webXml>
+								<classifier>prod</classifier>
 							</configuration>
-							<executions>
-								<execution>
-									<id>package-production</id>
-									<phase>package</phase>
-									<configuration>
-										<classifier>prod</classifier>
-									</configuration>
-									<goals>
-										<goal>war</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
-					</plugins>
-				</pluginManagement>
+							<goals>
+								<goal>war</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 		<plugins>
 			<plugin>
 				<groupId>org.scala-tools</groupId>
@@ -83,6 +83,7 @@
 				<artifactId>tomcat-maven-plugin</artifactId>
 				<configuration>
 					<server>converterServer</server>
+					<url>http://layout.scaloid.org/manager/text</url>
 					<warFile>${project.build.directory}/${project.build.finalName}-prod.war</warFile>
 					<path>/</path>
 				</configuration>
