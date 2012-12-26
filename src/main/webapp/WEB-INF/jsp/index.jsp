@@ -48,10 +48,10 @@
 Converted Scaloid layout is:<br/>
 
 <textarea class="span10" rows="10">${converted}</textarea> <br/>
-<span class="label label-important"><i icon="icon-warning"></i> Currently, this converter is in Alpha stages. The conversion result may omit some properties from original XML layout. Please check the equality of the layout manually.</span>
+<span class="label label-important"><i icon="icon-warning"></i> Currently, this converter is in Alpha stages. The conversion result may omit some properties from the original XML.<br/>Please check the equality of the layout manually.</span>
 
 
-<p>This project is currently in alpha stage. <a href="https://github.com/pocorall/scaloid-layout-converter">Fork this
+<p><a href="https://github.com/pocorall/scaloid-layout-converter">Fork this
     project on Github</a> and please help improve this!</p>
 
 
