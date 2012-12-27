@@ -21,6 +21,17 @@ class Converter(root: Node) {
   out.append("  }")
 
   def processResource(text: String): String = {
+    if (text equals "") return ""
+    val lText = text.toLowerCase
+    if (lText.endsWith("px")) {
+      return lText.substring(0, lText.length - 2)
+    }
+    if (lText.endsWith("dp")) {
+      return lText.substring(0, lText.length - 2) + " dip"
+    }
+    if (lText.endsWith("dip")) {
+      return lText.substring(0, lText.length - 3) + " dip"
+    }
 
     if (text.startsWith("@")) {
       "R." + (text drop 1).replaceAll("/", ".")
@@ -89,6 +100,16 @@ class Converter(root: Node) {
 
       }
       if (enteredLayoutContext) out.append(".end")
+    }
+
+    val textSize = textprop(node, "textSize")
+    if (textSize != "") {
+      out.append(".textSize(" + textSize + ")")
+    }
+
+    val orientation = prop(node, "orientation")
+    if (orientation != "") {
+      out.append(".orientation(" + orientation.toUpperCase + ")")
     }
 
     out.append("\n")
