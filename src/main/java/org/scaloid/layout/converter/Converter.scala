@@ -33,6 +33,13 @@ class Converter(root: Node) {
       return lText.substring(0, lText.length - 3) + " dip"
     }
 
+    if (lText.endsWith("sp")) {
+      return lText.substring(0, lText.length - 2) + " sp"
+    }
+    if (lText.endsWith("sip")) {
+      return lText.substring(0, lText.length - 3) + " sp"
+    }
+
     if (text.startsWith("@")) {
       "R." + (text drop 1).replaceAll("/", ".")
     } else {
@@ -102,10 +109,13 @@ class Converter(root: Node) {
       if (enteredLayoutContext) out.append(".end")
     }
 
-    val textSize = textprop(node, "textSize")
-    if (textSize != "") {
-      out.append(".textSize(" + textSize + ")")
-    }
+    val simpleConverts = List("textSize", "padding")
+    simpleConverts.foreach(propName => {
+      val proptext = textprop(node, propName)
+      if (proptext != "") {
+        out.append("." + propName + "(" + proptext + ")")
+      }
+    })
 
     val orientation = prop(node, "orientation")
     if (orientation != "") {
