@@ -12,7 +12,7 @@ class Controllers {
     val mm = new ModelMap()
     if (StringUtils.hasText(source)) {
       mm.addAttribute("original", source)
-      mm.addAttribute("converted", new Converter(source).toString)
+      mm.addAttribute("converted", Converter(source))
     }
   }
 }

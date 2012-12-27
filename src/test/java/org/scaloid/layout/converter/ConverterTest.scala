@@ -117,6 +117,6 @@ class ConverterTest extends TestCase {
         |</LinearLayout>
       """.stripMargin
 
-    println(new Converter(str).toString())
+    println(Converter(str))
   }
 }
