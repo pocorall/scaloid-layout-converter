@@ -23,21 +23,11 @@ class Converter(root: Node) {
   def processResource(text: String): String = {
     if (text equals "") return ""
     val lText = text.toLowerCase
-    if (lText.endsWith("px")) {
-      return lText.substring(0, lText.length - 2)
-    }
-    if (lText.endsWith("dp")) {
-      return lText.substring(0, lText.length - 2) + " dip"
-    }
-    if (lText.endsWith("dip")) {
-      return lText.substring(0, lText.length - 3) + " dip"
-    }
-
-    if (lText.endsWith("sp")) {
-      return lText.substring(0, lText.length - 2) + " sp"
-    }
-    if (lText.endsWith("sip")) {
-      return lText.substring(0, lText.length - 3) + " sp"
+    val units = Map("px" -> "", "dip" -> "dip", "dp" -> "dip", "sp" -> "sp", "sip" -> "sp")
+    for ((key, value) <- units) {
+      if (lText.endsWith(key)) {
+        return lText.substring(0, lText.length - key.length) + " " + value
+      }
     }
 
     if (text.startsWith("@")) {
