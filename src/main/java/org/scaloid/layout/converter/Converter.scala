@@ -51,6 +51,19 @@ class Converter(root: Node) {
     "wrap_content" equals prop
   }
 
+  def upperFormat(str: String) = {
+    val sb = new StringBuffer
+    str.foreach(c => {
+      if (c.isUpper) {
+        sb.append("_").append(c)
+      }
+      else {
+        sb.append(c.toUpper)
+      }
+    })
+    sb.toString
+  }
+
   def printNode(node: Node, indent: String, firstRun: Boolean = false) {
     val header: String = if (firstRun) "contentView += " else "this += "
     val processed = new HashSet[String]
@@ -107,10 +120,13 @@ class Converter(root: Node) {
       }
     })
 
-    val orientation = prop(node, "orientation")
-    if (orientation != "") {
-      out.append(".orientation(" + orientation.toUpperCase + ")")
-    }
+    val uppercaseConverts = List("orientation", "inputType")
+    uppercaseConverts.foreach(propName => {
+      val proptext = prop(node, propName)
+      if (proptext != "") {
+        out.append("." + propName + "(" + upperFormat(proptext) + ")")
+      }
+    })
 
     out.append("\n")
 
