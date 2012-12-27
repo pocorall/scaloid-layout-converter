@@ -37,8 +37,9 @@
 Converted <a href="http://scaloid.org">Scaloid</a> layout is:<br/>
 
 <textarea class="span10" rows="10">${converted}</textarea> <br/>
-<span class="label label-important">Currently, this converter is in Alpha stages. The conversion result may omit some properties from the original XML.<br/>Please check the equality of the layout manually.</span>
-<br/>
+
+<p><span class="label label-important">Currently, this converter is in Alpha stages. The conversion result may omit some properties from the original XML.<br/>Please check the equality of the layout manually.</span>
+</p>
 
 <p><a href="https://github.com/pocorall/scaloid-layout-converter">Fork this
     project on Github</a> and please help improve this!</p>
