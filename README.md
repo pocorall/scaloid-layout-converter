@@ -1,6 +1,6 @@
 # Scaloid Layout Converter
 
-This program converts Android XML layout into [Scaloid](http://scaloid.org) layout.
+This program converts an Android XML layout into a [Scaloid](http://scaloid.org) layout.
 
 ### Try this!
 

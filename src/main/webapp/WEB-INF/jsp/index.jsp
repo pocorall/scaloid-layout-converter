@@ -22,7 +22,7 @@
 <body>
 <h1>Scaloid Layout Converter</h1>
 
-<p>This program converts Android XML layout into <a href="http://scaloid.org">Scaloid</a> layout.</p>
+<p>This program converts an Android XML layout into a <a href="http://scaloid.org">Scaloid</a> layout.</p>
 
 
 <h4>Paste Android XML layout here: </h4>

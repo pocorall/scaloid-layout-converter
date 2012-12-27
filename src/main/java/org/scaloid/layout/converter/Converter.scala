@@ -65,7 +65,7 @@ class Converter(root: Node) {
   }
 
   def printNode(node: Node, indent: String, firstRun: Boolean = false) {
-    val header: String = if (firstRun) "contentView += " else "this += "
+    val header: String = if (firstRun) "contentView = " else "this += "
     val processed = new HashSet[String]
     val label = node.label
     if (label.endsWith("#PCDATA")) {
@@ -89,8 +89,6 @@ class Converter(root: Node) {
 
     }
 
-
-    //      node.attributes.foreach(i => out.append(i.key + i.value))
     if (!firstRun) {
       var enteredLayoutContext = false
       val lWidth = textprop(node, "layout_width")
