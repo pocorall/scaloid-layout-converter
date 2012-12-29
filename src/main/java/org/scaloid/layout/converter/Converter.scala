@@ -82,7 +82,7 @@ class Converter(root: Node) {
       label match {
         case "Button" =>
           val onClickFunc = prop(node, "onClick")
-          val onClick = if (onClickFunc equals "") "" else ", " + onClickFunc
+          val onClick = if (onClickFunc equals "") "" else ", " + onClickFunc + " _"
           out.append(textprop(node, "text") + onClick)
         case "TextView" => out.append(textprop(node, "text"))
         case _ =>
@@ -92,16 +92,16 @@ class Converter(root: Node) {
 
     if (!firstRun) {
       var enteredLayoutContext = false
-      val lWidth = textprop(node, "layout_width")
-      val lHeight = textprop(node, "layout_height")
+      val lWidth = prop(node, "layout_width")
+      val lHeight = prop(node, "layout_height")
       if (lWidth != "" && lHeight != "") {
 
         if (isMatchParent(lWidth) && isMatchParent(lHeight)) {
           out.append(".matchLayout")
           enteredLayoutContext = true
         } else if (isMatchParent(lWidth) && isWrapContent(lHeight)) {
-          out.append(".layout")
-          enteredLayoutContext = true
+//          out.append(".layout")
+//          enteredLayoutContext = true
         } else if (isWrapContent(lWidth) && isWrapContent(lHeight)) {
           out.append(".wrapLayout")
           enteredLayoutContext = true
