@@ -78,15 +78,16 @@ class Converter(root: Node) {
     } else {
       out.append(indent + header + "S" + label)
 
+      out.append("(")
       label match {
         case "Button" =>
           val onClickFunc = prop(node, "onClick")
           val onClick = if (onClickFunc equals "") "" else ", " + onClickFunc
-          out.append("(" + textprop(node, "text") + onClick + ")")
-        case "TextView" => out.append("(" + textprop(node, "text") + ")")
+          out.append(textprop(node, "text") + onClick)
+        case "TextView" => out.append(textprop(node, "text"))
         case _ =>
       }
-
+      out.append(")")
     }
 
     if (!firstRun) {
