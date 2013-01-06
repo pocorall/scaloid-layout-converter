@@ -92,23 +92,31 @@ class Converter(root: Node) {
 
     if (!firstRun) {
       var enteredLayoutContext = false
+      def appendLayoutProperty(str: String) {
+        if (!enteredLayoutContext) {
+          out.append(".<<")
+          enteredLayoutContext = true
+        }
+        out.append(str)
+      }
       val lWidth = prop(node, "layout_width")
       val lHeight = prop(node, "layout_height")
       if (lWidth != "" && lHeight != "") {
-
         if (isMatchParent(lWidth) && isMatchParent(lHeight)) {
-          out.append(".matchLayout")
-          enteredLayoutContext = true
+          appendLayoutProperty(".fill")
         } else if (isMatchParent(lWidth) && isWrapContent(lHeight)) {
-//          out.append(".layout")
-//          enteredLayoutContext = true
+          //          out.append(".layout")
+          //          enteredLayoutContext = true
         } else if (isWrapContent(lWidth) && isWrapContent(lHeight)) {
-          out.append(".wrapLayout")
-          enteredLayoutContext = true
+          appendLayoutProperty(".wrap")
         }
-
       }
-      if (enteredLayoutContext) out.append(".end")
+      val marginBottom = textprop(node, "layout_marginBottom")
+      if (marginBottom != "") {
+        appendLayoutProperty(".marginBottom(" + marginBottom + ")")
+      }
+
+      if (enteredLayoutContext) out.append(".>>")
     }
 
     val simpleConverts = List("textSize", "padding")

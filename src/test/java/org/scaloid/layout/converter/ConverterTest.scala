@@ -117,6 +117,33 @@ class ConverterTest extends TestCase {
         |</LinearLayout>
       """.stripMargin
 
-    println(Converter(str))
+    val str2 = """<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                 |        android:orientation="vertical" android:layout_width="match_parent"
+                 |        android:layout_height="wrap_content" android:padding="20dip">
+                 |    <TextView android:layout_width="match_parent"
+                 |            android:layout_height="wrap_content" android:text="Sign in"
+                 |            android:layout_marginBottom="25dip" android:textSize="24.5sp"/>
+                 |    <TextView android:layout_width="match_parent"
+                 |            android:layout_height="wrap_content" android:text="ID"/>
+                 |    <EditText android:layout_width="match_parent"
+                 |            android:layout_height="wrap_content" android:id="@+id/userId"/>
+                 |    <TextView android:layout_width="match_parent"
+                 |            android:layout_height="wrap_content" android:text="Password"/>
+                 |    <EditText android:layout_width="match_parent"
+                 |            android:layout_height="wrap_content" android:id="@+id/password"
+                 |            android:inputType="textPassword"/>
+                 |    <Button android:layout_width="match_parent"
+                 |            android:layout_height="wrap_content" android:id="@+id/signin"
+                 |            android:text="Sign in"/>
+                 |    <LinearLayout android:orientation="horizontal"
+                 |            android:layout_width="match_parent"
+                 |            android:layout_height="wrap_content">
+                 |        <Button android:text="Help" android:id="@+id/help"
+                 |                android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                 |        <Button android:text="Sign up" android:id="@+id/signup"
+                 |                android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                 |    </LinearLayout>
+                 |</LinearLayout>""".stripMargin
+    println(Converter(str2))
   }
 }
