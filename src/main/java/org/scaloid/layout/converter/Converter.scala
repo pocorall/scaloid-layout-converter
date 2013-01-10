@@ -65,18 +65,22 @@ class Converter(root: Node) {
   }
 
   def printNode(node: Node, indent: String, firstRun: Boolean = false) {
-    val header: String = if (firstRun) "contentView = " else "this += "
     val processed = new HashSet[String]
-    val label = node.label
+    var label = node.label
     if (label.endsWith("#PCDATA")) {
       return
     }
     if (label.endsWith("Layout")) {
+      val header: String = if (firstRun) "contentView = " else "this += "
+      if ("LinearLayout".equals(label) && prop(node, "orientation").equalsIgnoreCase("VERTICAL")) {
+        label = "VerticalLayout"
+      }
       out.append(indent + header + "new S" + label + " {\n")
+
       node.child.foreach(printNode(_, "  " + indent))
       out.append(indent + "}")
     } else {
-      out.append(indent + header + "S" + label)
+      out.append(indent + "S" + label)
 
       out.append("(")
       label match {
@@ -111,10 +115,14 @@ class Converter(root: Node) {
           appendLayoutProperty(".wrap")
         }
       }
-      val marginBottom = textprop(node, "layout_marginBottom")
-      if (marginBottom != "") {
-        appendLayoutProperty(".marginBottom(" + marginBottom + ")")
-      }
+
+      val layoutProps = List("marginBottom", "marginTop", "marginLeft", "marginRight", "margin")
+      layoutProps.foreach(propName => {
+        val p = textprop(node, "layout_" + propName)
+        if (p != "") {
+          appendLayoutProperty("." + propName + "(" + p + ")")
+        }
+      })
 
       if (enteredLayoutContext) out.append(".>>")
     }
@@ -127,7 +135,7 @@ class Converter(root: Node) {
       }
     })
 
-    val uppercaseConverts = List("orientation", "inputType")
+    val uppercaseConverts = List("inputType")
     uppercaseConverts.foreach(propName => {
       val proptext = prop(node, propName)
       if (proptext != "") {
