@@ -10,11 +10,13 @@ class Web extends HttpServiceActor with Views with ActorLogging {
   def receive = runRoute {
     path(Slash) {
       get {
-        complete(index("", ""))
+        complete(index())
       } ~
       post {
         formField('source) { source =>
-          complete(index(source, Converter(source)))
+          complete {
+            index(Some(source), Some(Converter(source)))
+          }
         }
       }
     }

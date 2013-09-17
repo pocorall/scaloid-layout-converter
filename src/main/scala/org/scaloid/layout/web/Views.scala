@@ -4,11 +4,12 @@ import spray.http._
 import spray.http.MediaTypes._
 
 
+
 trait Views {
 
-  def index(original: String, converted: String = "") = renderHtmlWithDocType(indexHtml(original, converted))
+  def index(original: Option[String] = None, converted: Option[String] = None) = renderHtmlWithDocType(indexHtml(original, converted))
 
-  private def indexHtml(original: String, converted: String) =
+  private def indexHtml(original: Option[String], converted: Option[String]) =
 <html>
   <head>
       <meta charset="utf-8"/>
@@ -18,10 +19,7 @@ trait Views {
       <meta name="author" content=""/>
 
       <!-- Le styles -->
-      <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css" rel="stylesheet"/>
-      <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap-responsive.css" rel="stylesheet"/>
-      <link href="http://twitter.github.com/bootstrap/assets/css/docs.css" rel="stylesheet"/>
-      <link href="http://twitter.github.com/bootstrap/assets/js/google-code-prettify/prettify.css" rel="stylesheet"/>
+      <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet"/>
 
       <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
       <!--[if lt IE 9]>
@@ -29,53 +27,52 @@ trait Views {
       <![endif]-->
   </head>
   <body>
-    <h1>Scaloid Layout Converter</h1>
 
-    <p>This program converts an Android XML layout into a <a href="http://scaloid.org">Scaloid</a> layout.</p>
+    <div class="container">
 
+      <div class="row">
+        <h1>Scaloid Layout Converter</h1>
+        <p>This program converts an Android XML layout into a <a href="http://scaloid.org">Scaloid</a> layout.</p>
+      </div>
 
-    <h4>Paste Android XML layout here: </h4>
+      <div class="row">
+        <h4>Paste Android XML layout here: </h4>
+        <form method="post" enctype="multipart/form-data">
+          <textarea name="source" class="col-xs-12" rows={original.fold("20")(_ => "10")}>{original.getOrElse("")}</textarea>
+          <br/>
+          <input type="submit" class="btn btn-primary btn-large btn-block"/>
+          <br/>
+        </form>
+      </div>
 
-    <form method="post" enctype="multipart/form-data">
-        <textarea name="source" class="span10" rows="10">{original}</textarea> <br/>
+      {if (converted.isDefined)
+        <div class="row">
+          <h4>Converted <a href="http://scaloid.org">Scaloid</a> layout is:</h4>
+          <pre class="prettyprint col-xs-12">{converted.get}</pre>
+        </div>
+      }
 
-        <input type="submit" class="btn btn-primary"/>
-    </form>
+      <div class="row">
+        <div class="panel panel-warning">
+          <div class="panel-heading">Note</div>
+          <div class="panel-body">
+            Currently, this converter is in beta stages. The conversion result may omit some properties from the original XML.
+            <br/>
+            Please check the equality of the layout manually.
+          </div>
+        </div>
 
-    Converted <a href="http://scaloid.org">Scaloid</a> layout is:<br/>
+        <p><a href="https://github.com/pocorall/scaloid-layout-converter">Fork this project on Github</a> and please help improve this!</p>
+      </div>
 
-    <textarea class="span10" rows="10">{converted}</textarea> <br/>
-
-    <p><span class="label label-important">Currently, this converter is in beta stages. The conversion result may omit some properties from the original XML.<br/>Please check the equality of the layout manually.</span>
-    </p>
-
-    <p><a href="https://github.com/pocorall/scaloid-layout-converter">Fork this
-        project on Github</a> and please help improve this!</p>
-
+    </div>
 
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
-    <script src="http://twitter.github.com/bootstrap/assets/js/jquery.js"></script>
-    <script src="http://twitter.github.com/bootstrap/assets/js/bootstrap-transition.js"></script>
-    <script src="http://twitter.github.com/bootstrap/assets/js/bootstrap-alert.js"></script>
-    <script src="http://twitter.github.com/bootstrap/assets/js/bootstrap-modal.js"></script>
-    <script src="http://twitter.github.com/bootstrap/assets/js/bootstrap-dropdown.js"></script>
-    <script src="http://twitter.github.com/bootstrap/assets/js/bootstrap-scrollspy.js"></script>
-    <script src="http://twitter.github.com/bootstrap/assets/js/bootstrap-tab.js"></script>
-    <script src="http://twitter.github.com/bootstrap/assets/js/bootstrap-tooltip.js"></script>
-    <script src="http://twitter.github.com/bootstrap/assets/js/bootstrap-popover.js"></script>
-    <script src="http://twitter.github.com/bootstrap/assets/js/bootstrap-button.js"></script>
-    <script src="http://twitter.github.com/bootstrap/assets/js/bootstrap-collapse.js"></script>
-    <script src="http://twitter.github.com/bootstrap/assets/js/bootstrap-carousel.js"></script>
-    <script src="http://twitter.github.com/bootstrap/assets/js/bootstrap-typeahead.js"></script>
-    <script src="http://twitter.github.com/bootstrap/assets/js/bootstrap-affix.js"></script>
-
-    <script src="http://twitter.github.com/bootstrap/assets/js/holder/holder.js"></script>
-    <script src="http://twitter.github.com/bootstrap/assets/js/google-code-prettify/prettify.js"></script>
-
-    <script src="http://twitter.github.com/bootstrap/assets/js/application.js"></script>
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+    <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
   </body>
 </html>
   
