@@ -8,7 +8,18 @@ http://layout.scaloid.org
 
 ## Project layout
 
-This project has a standard maven web application directory structure. We leverages Spring framework and Scala language.
+This project has a standard Maven/[SBT](http://scala-sbt.org) web application directory structure.
+We leverages [Spray](http://spray.io) HTTP toolkit and [Scala language](http://scala-lang.org).
+
+To run on a local machine:
+```
+$ sbt container:start shell
+```
+
+To make a `.war` file:
+```
+$ sbt package
+```
 
 For layout converter, check out the class `org.scaloid.layout.Converter`.
 
