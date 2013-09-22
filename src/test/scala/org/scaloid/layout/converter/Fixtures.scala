@@ -26,7 +26,9 @@ object Fixtures {
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/bps"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium">
+              <requestFocus/>
+          </TextView>
 
           <Button
             android:id="@+id/minus"

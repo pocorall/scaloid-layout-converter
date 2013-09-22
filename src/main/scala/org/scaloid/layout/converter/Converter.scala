@@ -1,5 +1,7 @@
 package org.scaloid.layout.converter
 
+import scala.xml.NodeSeq
+
 object Converter {
   import ReflectionUtils._
   import StringUtils._
@@ -27,7 +29,11 @@ object Converter {
     toType("android.widget", node.label).flatMap { aType =>
       aType.scaloidHelper map { sType =>
         val name = sType.typeConstructor.toString.className
-        val (layoutParams, props) = extractProps(node, aType, sType).partition(_.attr.name.startsWith("layout_"))
+        val (layoutParams, _props) = extractProps(node, aType, sType).partition(_.attr.name.startsWith("layout_"))
+        val props = node \ "requestFocus" match {
+          case NodeSeq.Empty => _props
+          case _ => _props :+ Property.custom("requestFocus")
+        }
 
         if (aType.isLayout)
           ViewGroup(
@@ -38,7 +44,7 @@ object Converter {
         else
           Failed(node.label)
       }
-    }.map (Transform(_))
+    }.map(Transform)
 
   def trySkip(node: Node): Option[View] =
     if (node.label.endsWith("#PCDATA")) Some(Skipped(node.label))

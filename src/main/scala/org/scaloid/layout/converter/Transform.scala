@@ -1,7 +1,7 @@
 package org.scaloid.layout.converter
 
 
-object Transform {
+object Transform extends (View => View) {
   import org.scaloid.layout.converter.Property._
 
   // TODO better transform composition
