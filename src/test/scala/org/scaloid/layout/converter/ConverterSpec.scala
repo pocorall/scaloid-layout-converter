@@ -17,7 +17,7 @@ class ConverterSpec extends FunSpec with Matchers {
           |contentView = new SVerticalLayout {
           |  SButton(R.string.tuner_on, onTunerStart).<<.width(MATCH_PARENT).height(60 dip).>>.textSize(25 sp)
           |  this += new SLinearLayout {
-          |    STextView(R.string.bps).<<.width(WRAP_CONTENT).height(WRAP_CONTENT).>>.textAppearance(android.R.attr.textAppearanceMedium).requestFocus
+          |    STextView("special: \\&<>").<<.width(WRAP_CONTENT).height(WRAP_CONTENT).>>.textAppearance(android.R.attr.textAppearanceMedium).requestFocus
           |    SButton("-").<<.width(0).height(WRAP_CONTENT).weight(1).>>.textSize(30 sp)
           |    SButton("+").<<.width(0).height(WRAP_CONTENT).weight(1).>>.textSize(30 sp)
           |    STextView(R.string.bps).<<.width(0).height(50 dip).weight(1).gravity(CENTER).>>.textAppearance(android.R.attr.textAppearanceLarge).textColor(R.color.yellow).textSize(35 sp).gravity(CENTER_VERTICAL | CENTER_HORIZONTAL)

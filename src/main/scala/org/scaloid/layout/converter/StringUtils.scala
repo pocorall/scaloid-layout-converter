@@ -2,6 +2,7 @@ package org.scaloid.layout.converter
 
 import scala.util.Try
 import scala.language.implicitConversions
+import org.apache.commons.lang3.StringEscapeUtils
 
 class StringUtils(val str: String) extends AnyVal {
 
@@ -54,6 +55,8 @@ class StringUtils(val str: String) extends AnyVal {
       StringUtils.colorNameMap.getOrElse(
         str.toLowerCase,
         throw new IllegalArgumentException("Unknown color: "+ str))
+
+  def escaped = StringEscapeUtils.escapeJava(str)
 }
 
 object StringUtils {

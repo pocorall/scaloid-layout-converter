@@ -25,7 +25,7 @@ object Fixtures {
             android:id="@+id/textView1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/bps"
+            android:text="special: \&amp;&lt;&gt;"
             android:textAppearance="?android:attr/textAppearanceMedium">
               <requestFocus/>
           </TextView>

@@ -28,6 +28,7 @@ libraryDependencies ++= Seq(
   "org.scaloid" %% "scaloid" % scaloidVersion,
   "com.google.android" % "android" % "2.2.1" withSources,
   "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+  "org.apache.commons" % "commons-lang3" % "3.1",
   "io.spray" % "spray-http" % sprayVersion,
   "io.spray" % "spray-httpx" % sprayVersion,
   "io.spray" % "spray-routing" % sprayVersion,

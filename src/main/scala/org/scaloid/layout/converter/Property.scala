@@ -10,6 +10,7 @@ case class Property(attr: XmlAttribute, value: Property.Value) {
 }
 
 object Property {
+  import StringUtils._
 
   sealed trait Value {
     def render: String
@@ -40,7 +41,7 @@ object Property {
   }
 
   case class Str(value: String) extends Value {
-    def render = "\""+ value +"\""
+    def render = "\""+ value.escaped +"\""
   }
 
   case class Listener(value: String) extends Value {
