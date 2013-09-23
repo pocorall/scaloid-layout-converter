@@ -22,4 +22,15 @@ class Web extends HttpServiceActor with Views with ActorLogging {
     }
   }
 
+  override def preStart: Unit = {
+    log.info("Warming up to make the first call faster...")
+    Converter {
+      <LinearLayout>
+        <Button android:text="@string/hello_world"/>
+      </LinearLayout>.toString
+    }
+    log.info("Warmup finished.")
+  }
+
+
 }
