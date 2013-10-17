@@ -69,7 +69,7 @@ object XmlAttribute {
 
   var count = 0
   private def lookup(tpe: String, className: String, attrName: String, constName: String, value: String) = {
-    val c = ConstantLookup.findByNameValue(className, attrName, constName, value.parseLongMaybeHex)
+    val c = AndroidConstant.findByNameValue(className, attrName, constName, value.parseLongMaybeHex)
 
     println("%3d %s %s:%s (%s) -> %s" format (count, tpe, attrName, constName, value, c))
     count += 1
