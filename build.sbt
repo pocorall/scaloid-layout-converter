@@ -21,13 +21,14 @@ resolvers ++= Seq(
 )
 
 val scaloidVersion = "2.3-8"
-val sprayVersion = "1.2-20130912"
+val sprayVersion = "1.2-20131011"
 val akkaVersion = "2.2.1"
 
 libraryDependencies ++= Seq(
   "org.scaloid" %% "scaloid" % scaloidVersion,
   "com.google.android" % "android" % "2.2.1" withSources,
   "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+  "org.reflections" % "reflections" % "0.9.9-RC1",
   "org.apache.commons" % "commons-lang3" % "3.1",
   "io.spray" % "spray-http" % sprayVersion,
   "io.spray" % "spray-httpx" % sprayVersion,

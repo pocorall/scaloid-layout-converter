@@ -10,25 +10,33 @@ object XmlAttributes {
   private def xmlUri = s"android-$apiVersion/data/res/values/attrs.xml" // TODO from more versions
 
   val byName: Map[String, XmlAttribute] = {
-    def nodeToAttr(node: Node): XmlAttribute = {
-      val name = (node \ "@name").text
+    def nodeToAttr(className: String, node: Node): XmlAttribute = {
+      val attrName = (node \ "@name").text
+
+      if (node.nonEmptyChildren.exists(Set("enum", "flag") contains _.label))
+        println(s"\n$className : $attrName")
 
       // TODO deduplicate
-      val enums = node.nonEmptyChildren.filter(_.label == "enum").map { enumTag => Enum.find(name, (enumTag \ "@name").text) }
-      val flags = node.nonEmptyChildren.filter(_.label == "flag") map { flagTag => Flag.find(name, (flagTag \ "@name").text) }
+      val enums = node.nonEmptyChildren
+        .filter(_.label == "enum")
+        .map { tag => Enum.find(className, attrName, (tag \ "@name").text, (tag \ "@value").text) }
+
+      val flags = node.nonEmptyChildren
+        .filter(_.label == "flag")
+        .map { tag => Flag.find(className, attrName, (tag \ "@name").text, (tag \ "@value").text) }
 
       val format = node \ "@format" match {
         case NodeSeq.Empty => Format.ResourceFormat
         case n => Format(n.text)
       }
 
-      new XmlAttribute(name, format, enums.toList, flags.toList)
+      new XmlAttribute(attrName, format, enums.toList, flags.toList)
     }
 
-    (XML.load(getClass.getClassLoader.getResource(xmlUri)) \\ "attr")
-      .view
-      .filter(tag => (tag \ "@format").nonEmpty || tag.child.nonEmpty)
-      .map(nodeToAttr)
+    (XML.load(getClass.getClassLoader.getResource(xmlUri)) \\ "declare-styleable")
+      .flatMap(ds => ds \ "attr" map ((ds \ "@name").text -> _))
+      .filter { case (_, tag) => (tag \ "@format").nonEmpty || tag.child.nonEmpty }
+      .map((nodeToAttr _).tupled)
       .map(a => a.name -> a)
       .toMap
   }
@@ -59,8 +67,20 @@ object XmlAttribute {
     def render = target
   }
 
+  var count = 0
+  private def lookup(tpe: String, className: String, attrName: String, constName: String, value: String) = {
+    val c = ConstantLookup.findByNameValue(className, attrName, constName, value.parseLongMaybeHex)
+
+    println("%3d %s %s:%s (%s) -> %s" format (count, tpe, attrName, constName, value, c))
+    count += 1
+  }
+
   object Enum {
-    def find(attrName: String, name: String): Enum = {
+    def find(className: String, attrName: String, name: String, value: String): Enum = {
+
+      val cName = name.toJavaConstFormat
+      lookup("[ENUM]", className, attrName, cName, value)
+
       Enum(name, name.toJavaConstFormat)
     }
   }
@@ -70,7 +90,10 @@ object XmlAttribute {
   }
 
   object Flag {
-    def find(attrName: String, name: String): Flag = {
+    def find(className: String, attrName: String, name: String, value: String): Flag = {
+      val cName = name.toJavaConstFormat
+      lookup("[FLAG]", className, attrName, cName, value)
+
       Flag(name, name.toJavaConstFormat)
     }
   }
