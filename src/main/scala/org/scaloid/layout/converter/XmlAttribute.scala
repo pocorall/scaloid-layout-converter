@@ -63,16 +63,16 @@ object XmlAttribute {
   def custom(name: String, format: Format = ResourceFormat, enums: List[Enum] = Nil, flags: List[Flag] = Nil) =
     new XmlAttribute(name, format, enums, flags)
 
-  case class Enum(name: String, target: String) {
-    def render = target
-  }
-
   var count = 0
   private def lookup(tpe: String, className: String, attrName: String, constName: String, value: String) = {
     val c = AndroidConstant.findByNameValue(className, attrName, constName, value.parseLongMaybeHex)
 
     println("%3d %s %s:%s (%s) -> %s" format (count, tpe, attrName, constName, value, c))
     count += 1
+  }
+
+  case class Enum(name: String, target: String) {
+    def render = target
   }
 
   object Enum {

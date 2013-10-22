@@ -12,71 +12,81 @@ object AndroidConstant {
   import scala.collection.JavaConverters._
   import StringUtils._
 
-  val r = {
-    import org.reflections._
-    import scanners._
-    import util._
-    new Reflections(
-      new ConfigurationBuilder()
-        .setUrls(ClasspathHelper.forPackage("android"))
-        .setScanners(new SubTypesScanner(false))
-    )
-  }
-
-  val clss = r.getSubTypesOf(classOf[java.lang.Object]).asScala.toSet[Class[_]]
-
-  private val consts =
-    for {
-      cls <- clss
-      field <- cls.getDeclaredFields
-      if field.toString.startsWith("public static final int ") &&
-        field.getName.isJavaConstFormat
-    } yield AndroidConstant(field.getName, cls, field.getLong(null), false)
-
-  private val enums =
-    clss.flatMap { c =>
-      ((if (c.isEnum) List(c) else Nil) ++ c.getClasses.filter(_.isEnum)).flatMap {
-        _.getEnumConstants.map(_.asInstanceOf[java.lang.Enum[_]]) map { enum =>
-          AndroidConstant(enum.name, enum.getDeclaringClass, enum.ordinal, true)
-        }
-      }
-    }
-
-  val reverseIndex =
-    (Map.empty[String, Set[AndroidConstant]].withDefaultValue(Set.empty) /: (consts ++ enums)) { (idx, const) =>
-      val tokens = const.declaringClass.getSimpleName.tokenize ++ const.name.tokenize
-      (idx /: tokens) { (idx2, token) => idx2 updated (token, idx2(token) + const) }
-    }
-
-  def findByNameValue(className: String, attrName: String, constName: String, _value: Long) =
+  def findByNameValue(className: String, attrName: String, constName: String, xmlValue: Long) =
     if (ignored(className, attrName, constName)) None
     else {
       val minorTokens = List(className, attrName).flatMap(_.tokenize)
       val majorTokens = adjustToken(className, attrName, constName)
       val tokens = minorTokens ++ majorTokens
-      val priorities = (minorTokens.map(t => t -> adjustPriority(t)) ++ majorTokens.zip(Stream from 100)).toMap
+      val tokenPriority = (minorTokens.map(t => t -> adjustPriority(t)) ++ majorTokens.zip(Stream from 100)).toMap
+
       val tokensWithCandidates = tokens map (t => t -> reverseIndex(t))
-      val value = adjustValue(className, attrName, constName) getOrElse _value
+      val codeValue = adjustValue(className, attrName, constName) getOrElse xmlValue
 
-      (Map.empty[AndroidConstant, Int].withDefaultValue(0) /: tokensWithCandidates) {
-        case (map, (token, consts)) =>
-          (map /: consts) { (map2, const) =>
-            if (const.isEnum || const.value == value)
-              map2 updated (const, map(const) + priorities(token))
-            else
-              map2
-          }
+      val initialMap =  Map.empty[AndroidConstant, Int] withDefaultValue 0
 
+      (initialMap /: tokensWithCandidates) { case (map, (token, consts)) =>
+        (map /: consts) { (map2, const) =>
+          if (const.isEnum || const.value == codeValue)
+            map2 updated (const, map(const) + tokenPriority(token))
+          else
+            map2
+        }
       }.filter(_._2 > 100).toList match {
         case Nil => None
         case cs => Some(cs.maxBy(_._2))
       }
     }
 
+  private val reverseIndex = {
+    val reflections = {
+      import org.reflections._
+      import scanners._
+      import util._
+      new Reflections(
+        new ConfigurationBuilder()
+          .setUrls(ClasspathHelper.forPackage("android"))
+          .setScanners(new SubTypesScanner(false))
+      )
+    }
 
-  // TODO organized manual adjustments
+    val classes = reflections.getSubTypesOf(classOf[java.lang.Object]).asScala.toSet[Class[_]]
 
-  // black magic
+    def isPublicStaticFinalInt(field: java.lang.reflect.Field) = {
+      val psf = {
+        import java.lang.reflect.Modifier._
+        PUBLIC | STATIC | FINAL
+      }
+      (field.getModifiers & psf) == psf && field.getType == classOf[Int]
+    }
+
+    val consts =
+      for {
+        cls <- classes
+        field <- cls.getDeclaredFields
+        if isPublicStaticFinalInt(field) && field.getName.isJavaConstFormat
+      } yield AndroidConstant(field.getName, cls, field.getLong(null), false)
+
+    val enums =
+      classes.flatMap { c =>
+        ((if (c.isEnum) List(c) else Nil) ++ c.getClasses.filter(_.isEnum)).flatMap {
+          _.getEnumConstants.map(_.asInstanceOf[java.lang.Enum[_]]) map { enum =>
+            AndroidConstant(enum.name, enum.getDeclaringClass, enum.ordinal, true)
+          }
+        }
+      }
+
+    val initialMap = Map.empty[String, Set[AndroidConstant]] withDefaultValue Set.empty
+
+    (initialMap /: (consts ++ enums)) { (idx, const) =>
+      val tokens = const.declaringClass.getSimpleName.tokenize ++ const.name.tokenize
+      (idx /: tokens) { (idx2, token) => idx2 updated (token, idx2(token) + const) }
+    }
+  }
+
+  // TODO organize manual adjustments
+
+  // TODO black magic! rework for higher API versions than 8
   private val adjustPriority = (_: String) match {
     case "GRAVITY" | "PERSISTENT" | "SCROLLBARS" | "FADING" | "CACHE" | "EDGE" | "STREAM" => 10
     case "TYPE" | "MODE" => 1
@@ -105,6 +115,7 @@ object AndroidConstant {
     }
   }
 
+  // TODO add explicit explanation for users
   private val ignored = (_: (String, String, String)) match {
     // not declared as public
     case ("View", "scrollbars", _) => true
