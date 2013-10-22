@@ -1,5 +1,7 @@
 package org.scaloid.layout.converter
 
+import org.scaloid.layout.converter.Property.Constants
+
 
 object XmlAttributes {
   import scala.xml._
@@ -43,15 +45,24 @@ object XmlAttributes {
 }
 
 
-class XmlAttribute(val name: String, _format: XmlAttribute.Format, enums: List[XmlAttribute.Enum], flags: List[XmlAttribute.Flag]) {
+class XmlAttribute(val name: String, format: XmlAttribute.Format, enums: List[XmlAttribute.Enum], flags: List[XmlAttribute.Flag]) {
   import XmlAttribute._
   import Format._
+  import StringUtils._
 
-  private val format = _format orElse new EnumFormat(enums) orElse new FlagsFormat(flags)
+  private val consts: Map[String, AndroidConstant] =
+    (enums.map { e => e.name -> e.target } ++ flags.map { e => e.name -> e.target }).toMap
 
   val renderName: String = if (name.startsWith("layout_")) name.drop(7) else name
 
-  def parse(str: String) = format(str)
+  def parse(str: String) =
+    if (flags.nonEmpty)
+      Constants(str.split('|').toList.map(_.trim.toJavaConstFormat).map(consts.get _).flatten)
+    else
+      consts.get(str.toJavaConstFormat) match {
+        case Some(const) => Constants(const)
+        case None => format(str)
+      }
 }
 
 object XmlAttribute {
@@ -64,37 +75,39 @@ object XmlAttribute {
     new XmlAttribute(name, format, enums, flags)
 
   var count = 0
-  private def lookup(tpe: String, className: String, attrName: String, constName: String, value: String) = {
+  private def lookup(tpe: String, className: String, attrName: String, constName: String, value: String): AndroidConstant = {
     val c = AndroidConstant.findByNameValue(className, attrName, constName, value.parseLongMaybeHex)
 
     println("%3d %s %s:%s (%s) -> %s" format (count, tpe, attrName, constName, value, c))
     count += 1
+
+    c match {
+      case Some((const, _)) => const
+      case None => RawConstantValue(value.parseLongMaybeHex)
+    }
   }
 
-  case class Enum(name: String, target: String) {
-    def render = target
+  case class Enum(name: String, target: AndroidConstant) {
+    def render = target.render
   }
 
   object Enum {
     def find(className: String, attrName: String, name: String, value: String): Enum = {
-
       val cName = name.toJavaConstFormat
-      lookup("[ENUM]", className, attrName, cName, value)
-
-      Enum(name, name.toJavaConstFormat)
+      val res = lookup("[ENUM]", className, attrName, cName, value)
+      Enum(name, res)
     }
   }
 
-  case class Flag(name: String, target: String) {
-    def render = target
+  case class Flag(name: String, target: AndroidConstant) {
+    def render = target.render
   }
 
   object Flag {
     def find(className: String, attrName: String, name: String, value: String): Flag = {
       val cName = name.toJavaConstFormat
-      lookup("[FLAG]", className, attrName, cName, value)
-
-      Flag(name, name.toJavaConstFormat)
+      val res = lookup("[FLAG]", className, attrName, cName, value)
+      Flag(name, res)
     }
   }
 
@@ -194,16 +207,6 @@ object XmlAttribute {
         else
           throw new IllegalArgumentException("Illegal dimension format: "+ str)
       }
-    }
-
-    class EnumFormat(enums: List[Enum]) extends Format {
-      def isDefinedAt(x: String) = enums exists (_.name == x.toJavaConstFormat)
-      def apply(x: String) = Constants(x.toJavaConstFormat)
-    }
-
-    class FlagsFormat(enums: List[Flag]) extends Format {
-      def isDefinedAt(x: String) = enums exists (_.name == x.toJavaConstFormat)
-      def apply(x: String) = Constants(x.split('|').map(_.toJavaConstFormat).toList)
     }
   }
 }

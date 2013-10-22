@@ -52,11 +52,11 @@ object Property {
     def render = ""
   }
 
-  case class Constants(values: List[String]) extends Value {
-    def render = values.mkString(" | ")
+  case class Constants(values: List[AndroidConstant]) extends Value {
+    def render = values.map(_.render).mkString(" | ")
   }
   object Constants {
-    def apply(value: String, values: String*): Constants = new Constants(value :: values.toList)
+    def apply(value: AndroidConstant, values: AndroidConstant*): Constants = new Constants(value :: values.toList)
   }
 
   def custom(name: String, value: Value = Empty) = Property(XmlAttribute.custom(name), value)

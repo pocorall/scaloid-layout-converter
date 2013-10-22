@@ -1,10 +1,16 @@
 package org.scaloid.layout.converter
 
 
-case class AndroidConstant(name: String, declaringClass: Class[_], value: Long, isEnum: Boolean) {
+sealed trait AndroidConstant { def render: String }
+
+case class RawConstantValue(value: Long) extends AndroidConstant {
+  def render = value.toString
+}
+case class ConstantRef(name: String, declaringClass: Class[_], value: Long, isEnum: Boolean) extends AndroidConstant {
   def isConst = ! isEnum
   def fqcn = declaringClass.getName +"."+ name
   override def toString = s"${fqcn.replace("android.", "")}($value)"
+  def render = name
 }
 
 
@@ -23,7 +29,16 @@ object AndroidConstant {
       val tokensWithCandidates = tokens map (t => t -> reverseIndex(t))
       val codeValue = adjustValue(className, attrName, constName) getOrElse xmlValue
 
-      val initialMap =  Map.empty[AndroidConstant, Int] withDefaultValue 0
+      val lastToken = majorTokens.last
+      val initialMap: Map[ConstantRef, Int] =
+        tokensWithCandidates.last._2.map { const =>
+          val initialScore =
+            if (const.name == constName) 20
+            else if (const.name endsWith lastToken) 10
+            else 0
+
+          const -> initialScore
+        }.toMap withDefaultValue 0
 
       (initialMap /: tokensWithCandidates) { case (map, (token, consts)) =>
         (map /: consts) { (map2, const) =>
@@ -65,18 +80,18 @@ object AndroidConstant {
         cls <- classes
         field <- cls.getDeclaredFields
         if isPublicStaticFinalInt(field) && field.getName.isJavaConstFormat
-      } yield AndroidConstant(field.getName, cls, field.getLong(null), false)
+      } yield ConstantRef(field.getName, cls, field.getLong(null), false)
 
     val enums =
       classes.flatMap { c =>
         ((if (c.isEnum) List(c) else Nil) ++ c.getClasses.filter(_.isEnum)).flatMap {
           _.getEnumConstants.map(_.asInstanceOf[java.lang.Enum[_]]) map { enum =>
-            AndroidConstant(enum.name, enum.getDeclaringClass, enum.ordinal, true)
+            ConstantRef(enum.name, enum.getDeclaringClass, enum.ordinal, true)
           }
         }
       }
 
-    val initialMap = Map.empty[String, Set[AndroidConstant]] withDefaultValue Set.empty
+    val initialMap = Map.empty[String, Set[ConstantRef]] withDefaultValue Set.empty
 
     (initialMap /: (consts ++ enums)) { (idx, const) =>
       val tokens = const.declaringClass.getSimpleName.tokenize ++ const.name.tokenize
@@ -84,22 +99,13 @@ object AndroidConstant {
     }
   }
 
-  // TODO organize manual adjustments
-
-  // TODO black magic! rework for higher API versions than 8
-  private val adjustPriority = (_: String) match {
-    case "GRAVITY" | "PERSISTENT" | "SCROLLBARS" | "FADING" | "CACHE" | "EDGE" | "STREAM" => 10
-    case "TYPE" | "MODE" => 1
-    case _ => 2
-  }
-
   private val adjustToken = (_: (String, String, String)) match {
-    case ("ImageView", "scaleType", "FIT_X_Y") => List("FIT", "XY")
     case ("ProgressBar", "indeterminateBehavior", "REPEAT") => List("Animation", "RESTART")
     case ("ProgressBar", "indeterminateBehavior", "CYCLE") => List("Animation", "REVERSE")
     case (_, _, constName) => constName.tokenize
   }
 
+  // TODO find more consistent rule
   private val adjustValue = {
     import android.view.{View => V, ViewGroup => VG}
 
@@ -113,6 +119,13 @@ object AndroidConstant {
       case ("ViewGroup", "descendantFocusability", "BLOCKS_DESCENDANTS") => Some(VG.FOCUS_BLOCK_DESCENDANTS)
       case (_, _, _) => None
     }
+  }
+
+  // TODO black magic! rework for higher API versions than 8
+  private val adjustPriority = (_: String) match {
+    case "GRAVITY" | "PERSISTENT" | "SCROLLBARS" | "FADING" | "CACHE" | "EDGE" | "STREAM" => 10
+    case "TYPE" | "MODE" => 1
+    case _ => 2
   }
 
   // TODO add explicit explanation for users

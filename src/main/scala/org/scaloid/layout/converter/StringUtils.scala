@@ -66,7 +66,10 @@ class StringUtils(val str: String) extends AnyVal {
 
   def escaped = StringEscapeUtils.escapeJava(str)
 
-  def tokenize = toJavaConstFormat.split('_').toList.filter(_.nonEmpty)
+  def tokenize =
+    toJavaConstFormat
+      .replaceAll("_([A-Z])_", "_$1") // ex) FIT_X_Y => FIT_XY
+      .split('_').toList.filter(_.nonEmpty)
 }
 
 object StringUtils {
