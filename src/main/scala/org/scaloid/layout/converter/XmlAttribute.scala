@@ -11,20 +11,21 @@ object XmlAttributes {
 
   private def xmlUri = s"android-$apiVersion/data/res/values/attrs.xml" // TODO from more versions
 
+  var cnt = 0
   val byName: Map[String, XmlAttribute] = {
     def nodeToAttr(className: String, node: Node): XmlAttribute = {
       val attrName = (node \ "@name").text
 
-      if (node.nonEmptyChildren.exists(Set("enum", "flag") contains _.label))
-        println(s"\n$className : $attrName")
+      if (node.child.exists(Set("enum", "flag") contains _.label)) {
+        println(s"\n[$cnt] $className : $attrName")
+        cnt += 1
+      }
 
       // TODO deduplicate
-      val enums = node.nonEmptyChildren
-        .filter(_.label == "enum")
+      val enums = node.child.filter(_.label == "enum")
         .map { tag => Enum.find(className, attrName, (tag \ "@name").text, (tag \ "@value").text) }
 
-      val flags = node.nonEmptyChildren
-        .filter(_.label == "flag")
+      val flags = node.child.filter(_.label == "flag")
         .map { tag => Flag.find(className, attrName, (tag \ "@name").text, (tag \ "@value").text) }
 
       val format = node \ "@format" match {
@@ -35,8 +36,11 @@ object XmlAttributes {
       new XmlAttribute(attrName, format, enums.toList, flags.toList)
     }
 
-    (XML.load(getClass.getClassLoader.getResource(xmlUri)) \\ "declare-styleable")
-      .flatMap(ds => ds \ "attr" map ((ds \ "@name").text -> _))
+    val attrXml = XML.load(getClass.getClassLoader.getResource(xmlUri))
+    val topAttrs = attrXml \ "attr" map ("View" -> _)
+    val subAttrs = attrXml \ "declare-styleable" flatMap (ds => ds \ "attr" map ((ds \ "@name").text -> _))
+
+    (topAttrs.iterator ++ subAttrs.iterator)
       .filter { case (_, tag) => (tag \ "@format").nonEmpty || tag.child.nonEmpty }
       .map((nodeToAttr _).tupled)
       .map(a => a.name -> a)
@@ -46,8 +50,6 @@ object XmlAttributes {
 
 
 class XmlAttribute(val name: String, format: XmlAttribute.Format, enums: List[XmlAttribute.Enum], flags: List[XmlAttribute.Flag]) {
-  import XmlAttribute._
-  import Format._
   import StringUtils._
 
   private val consts: Map[String, AndroidConstant] =
@@ -76,14 +78,14 @@ object XmlAttribute {
 
   var count = 0
   private def lookup(tpe: String, className: String, attrName: String, constName: String, value: String): AndroidConstant = {
-    val c = AndroidConstant.findByNameValue(className, attrName, constName, value.parseLongMaybeHex)
+    val c = AndroidConstant.findByNameValue(className, attrName, constName, value.parseIntMaybeHex)
 
-    println("%3d %s %s:%s (%s) -> %s" format (count, tpe, attrName, constName, value, c))
+    println("    %3d %s %s:%s (%s) -> %s" format (count, tpe, attrName, constName, value, c))
     count += 1
 
     c match {
       case Some((const, _)) => const
-      case None => RawConstantValue(value.parseLongMaybeHex)
+      case None => RawConstantValue(value.parseIntMaybeHex)
     }
   }
 

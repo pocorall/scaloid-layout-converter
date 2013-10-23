@@ -50,20 +50,21 @@ object Transform extends (View => View) {
       case _ => widget
     }
 
+
   def transformViewGroup(vg: ViewGroup): ViewGroup =
     vg.name match {
       case "SLinearLayout" =>
         vg.prop("orientation") match {
-          case Some(o) if o.value == Constants("VERTICAL") =>
-            vg.withoutProps("orientation").copy(name = "SVerticalLayout")
+//          case Some(o) if o.value == Constants("VERTICAL") =>
+//            vg.withoutProps("orientation").copy(name = "SVerticalLayout")
           case _ => vg
         }
       case _ => vg
     }
 
-  private def isMatchParent(prop: Property) =
-    Seq(Constants("MATCH_PARENT"), Constants("FILL_PARENT")) contains prop.value
+  private def isMatchParent(prop: Property) = false
+//    Seq(Constants("MATCH_PARENT"), Constants("FILL_PARENT")) contains prop.value
 
-  private def isWrapContent(prop: Property) =
-    prop.value == Constants("WRAP_CONTENT")
+  private def isWrapContent(prop: Property) = false
+//    prop.value == Constants("WRAP_CONTENT")
 }

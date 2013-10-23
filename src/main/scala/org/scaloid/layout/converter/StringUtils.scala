@@ -60,9 +60,9 @@ class StringUtils(val str: String) extends AnyVal {
         str.toLowerCase,
         throw new IllegalArgumentException("Unknown color: "+ str))
 
-  def parseLongMaybeHex =
-    if (str.startsWith("0x")) java.lang.Long.parseLong(str.drop(2), 16)
-    else java.lang.Long.parseLong(str)
+  def parseIntMaybeHex =
+    if (str.startsWith("0x")) java.lang.Integer.parseInt(str.drop(2), 16)
+    else str.toInt
 
   def escaped = StringEscapeUtils.escapeJava(str)
 
