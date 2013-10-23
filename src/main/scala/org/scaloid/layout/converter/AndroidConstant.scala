@@ -132,8 +132,8 @@ object AndroidConstant {
   // TODO add explicit explanation for users
   private val ignored = (_: (String, String, String)) match {
     // not declared as public
-    case ("View", "scrollbars", _) => true
     case ("View", "fadingEdge", _) => true
+    case ("View", "scrollbars", _) => true
 
     // compound properties
     case (_, "capitalize", _) => true
@@ -143,11 +143,11 @@ object AndroidConstant {
     case (_, "autoLink", "NONE") => true
     case (_, "ellipsize", "NONE") => true
     case ("BitmapDrawable", "tileMode", "DISABLED") => true
-    case ("Searchable", _, _) => true
-    case ("TwoLineListItem", _, _) => true
     case ("MenuGroup", _, _) => true
+    case ("Searchable", _, _) => true
     case ("TextView", "marqueeRepeatLimit", _) => true
     case ("TextView", "numeric", _) => true
+    case ("TwoLineListItem", _, _) => true
 
     case _ => false
   }
