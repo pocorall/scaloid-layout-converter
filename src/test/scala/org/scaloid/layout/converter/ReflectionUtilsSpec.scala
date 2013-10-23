@@ -6,7 +6,7 @@ import org.scalatest._
 
 
 @RunWith(classOf[JUnitRunner])
-class ReflectionUtilsSpec extends FunSpec with Matchers {
+class ReflectionUtilsSpec extends FunSpec with Matchers with OptionValues {
 
   import ReflectionUtils._
   import reflect.runtime.universe.typeTag
@@ -16,8 +16,8 @@ class ReflectionUtilsSpec extends FunSpec with Matchers {
     describe ("toType") {
 
       it ("should reify a Type from a FQCN") {
-        toType("android.widget.Button") should equal (Some(typeTag[android.widget.Button].tpe))
-        toType("org.scaloid.common.TraitView") should equal (Some(typeTag[org.scaloid.common.TraitView[_]].tpe.typeConstructor))
+        toType("android.widget.Button").value should equal (typeTag[android.widget.Button].tpe)
+        toType("org.scaloid.common.TraitView").value.typeConstructor should equal (typeTag[org.scaloid.common.TraitView[_]].tpe.typeConstructor)
       }
 
       it ("should return None from a non-existing FQCN") {
@@ -28,17 +28,17 @@ class ReflectionUtilsSpec extends FunSpec with Matchers {
     describe ("ReflectionOps") {
 
       it ("should determine android class types") {
-        val button = toType("android.widget.Button").get
+        val button = toType("android.widget.Button").value
         button.isView should be (true)
         button.isWidget should be (true)
         button.isLayout should be (false)
 
-        val linearLayout = toType("android.widget.LinearLayout").get
+        val linearLayout = toType("android.widget.LinearLayout").value
         linearLayout.isView should be (true)
         linearLayout.isWidget should be (false)
         linearLayout.isLayout should be (true)
 
-        val activity = toType("android.app.Activity").get
+        val activity = toType("android.app.Activity").value
         activity.isView should be (false)
         activity.isWidget should be (false)
         activity.isLayout should be (false)
@@ -49,13 +49,13 @@ class ReflectionUtilsSpec extends FunSpec with Matchers {
     describe("findScaloidHelper") {
 
       it ("should be able to find existing Scaloid helpers") {
-        val button = toType("android.widget.Button").get
+        val button = toType("android.widget.Button").value
         button.scaloidHelper should equal (Some(typeTag[org.scaloid.common.SButton].tpe))
 
-        val linearLayout = toType("android.widget.LinearLayout").get
+        val linearLayout = toType("android.widget.LinearLayout").value
         linearLayout.scaloidHelper should equal (Some(typeTag[org.scaloid.common.SLinearLayout].tpe))
 
-        val list = toType("scala.collection.immutable.List").get
+        val list = toType("scala.collection.immutable.List").value
         list.scaloidHelper should equal (None)
       }
 

@@ -1,6 +1,7 @@
 package org.scaloid.layout.converter
 
 import scala.xml.NodeSeq
+import org.scaloid.layout.converter.Property.Constants
 
 object Converter {
   import ReflectionUtils._
@@ -13,14 +14,23 @@ object Converter {
       case e: Throwable => return e.getClass.getSimpleName + ": " + (e.getMessage)
     }
 
-  def renderWithWrappingMethod(view: View) =
-    s"""
+  def renderWithWrappingMethod(view: View) = {
+    val importClause =
+      collectImports(view).toList
+        .map(_.getName.replace("$", "."))
+        .sorted
+        .map("import " + _)
+        .mkString("\n")
+
+    s"""$importClause
+       |
        |override def onCreate(savedInstanceState: Bundle) {
        |  super.onCreate(savedInstanceState)
        |
        |${view.render("  ")}
        |}
      """.stripMargin.trim
+  }
 
   def convert(node: Node): View =
     trySkip(node) orElse tryView(node) getOrElse Failed(node.label)
@@ -59,4 +69,25 @@ object Converter {
           Property(attr, value)
         }
     }.flatten
+
+  // TODO remove classes already in scope
+  def collectImports(view: View) = {
+
+    def run(view: View, acc: Set[Class[_]]): Set[Class[_]] = {
+      val classes =
+        acc ++
+          (view.props ++ view.layoutParams).map(_.value).collect {
+            case Constants(cs) => cs.collect {
+              case ConstantRef(_, cls, _) => cls
+            }
+          }.flatten
+
+      view match {
+        case vg: ViewGroup => vg.children.flatMap(run(_, classes)).toSet
+        case _ => classes
+      }
+    }
+
+    run(view, Set.empty)
+  }
 }

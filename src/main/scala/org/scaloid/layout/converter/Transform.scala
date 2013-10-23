@@ -51,20 +51,29 @@ object Transform extends (View => View) {
     }
 
 
+  import android.widget.{ LinearLayout => LL }
+  import android.view.ViewGroup.{ LayoutParams => LP }
+
+  val VERTICAL = AndroidConstant(classOf[LL], "VERTICAL")
+  val HORIZONTAL = AndroidConstant(classOf[LL], "HORIZONTAL")
+  val MATCH_PARENT = AndroidConstant(classOf[LP], "MATCH_PARENT")
+  val FILL_PARENT = AndroidConstant(classOf[LP], "FILL_PARENT")
+  val WRAP_CONTENT = AndroidConstant(classOf[LP], "WRAP_CONTENT")
+
   def transformViewGroup(vg: ViewGroup): ViewGroup =
     vg.name match {
       case "SLinearLayout" =>
         vg.prop("orientation") match {
-//          case Some(o) if o.value == Constants("VERTICAL") =>
-//            vg.withoutProps("orientation").copy(name = "SVerticalLayout")
+          case Some(o) if o.value == Constants(VERTICAL) =>
+            vg.withoutProps("orientation").copy(name = "SVerticalLayout")
           case _ => vg
         }
       case _ => vg
     }
 
-  private def isMatchParent(prop: Property) = false
-//    Seq(Constants("MATCH_PARENT"), Constants("FILL_PARENT")) contains prop.value
+  private def isMatchParent(prop: Property) =
+    Seq(Constants(MATCH_PARENT), Constants(FILL_PARENT)) contains prop.value
 
-  private def isWrapContent(prop: Property) = false
-//    prop.value == Constants("WRAP_CONTENT")
+  private def isWrapContent(prop: Property) =
+    prop.value == Constants(WRAP_CONTENT)
 }

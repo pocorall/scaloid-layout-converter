@@ -11,14 +11,14 @@ object XmlAttributes {
 
   private def xmlUri = s"android-$apiVersion/data/res/values/attrs.xml" // TODO from more versions
 
-  var cnt = 0
+  private var attrCount = 0
   val byName: Map[String, XmlAttribute] = {
     def nodeToAttr(className: String, node: Node): XmlAttribute = {
       val attrName = (node \ "@name").text
 
       if (node.child.exists(Set("enum", "flag") contains _.label)) {
-        println(s"\n[$cnt] $className : $attrName")
-        cnt += 1
+//        println(s"\n[$attrCount] $className : $attrName")
+        attrCount += 1
       }
 
       // TODO deduplicate
@@ -37,7 +37,7 @@ object XmlAttributes {
     }
 
     val attrXml = XML.load(getClass.getClassLoader.getResource(xmlUri))
-    val topAttrs = attrXml \ "attr" map ("View" -> _)
+    val topAttrs = attrXml \ "attr" map ("android" -> _)
     val subAttrs = attrXml \ "declare-styleable" flatMap (ds => ds \ "attr" map ((ds \ "@name").text -> _))
 
     (topAttrs.iterator ++ subAttrs.iterator)
@@ -49,8 +49,7 @@ object XmlAttributes {
 }
 
 
-class XmlAttribute(val name: String, format: XmlAttribute.Format, enums: List[XmlAttribute.Enum], flags: List[XmlAttribute.Flag]) {
-  import StringUtils._
+case class XmlAttribute(name: String, format: XmlAttribute.Format, enums: List[XmlAttribute.Enum], flags: List[XmlAttribute.Flag]) {
 
   private val consts: Map[String, AndroidConstant] =
     (enums.map { e => e.name -> e.target } ++ flags.map { e => e.name -> e.target }).toMap
@@ -59,11 +58,11 @@ class XmlAttribute(val name: String, format: XmlAttribute.Format, enums: List[Xm
 
   def parse(str: String) =
     if (flags.nonEmpty)
-      Constants(str.split('|').toList.map(_.trim.toJavaConstFormat).map(consts.get _).flatten)
+      Constants(str.split('|').toList.map(_.trim).map(consts.get _).flatten)
     else
-      consts.get(str.toJavaConstFormat) match {
+      consts.get(str) match {
         case Some(const) => Constants(const)
-        case None => format(str)
+        case None =>  format(str)
       }
 }
 
@@ -76,12 +75,12 @@ object XmlAttribute {
   def custom(name: String, format: Format = ResourceFormat, enums: List[Enum] = Nil, flags: List[Flag] = Nil) =
     new XmlAttribute(name, format, enums, flags)
 
-  var count = 0
+  private var constCount = 0
   private def lookup(tpe: String, className: String, attrName: String, constName: String, value: String): AndroidConstant = {
     val c = AndroidConstant.findByNameValue(className, attrName, constName, value.parseIntMaybeHex)
 
-    println("    %3d %s %s:%s (%s) -> %s" format (count, tpe, attrName, constName, value, c))
-    count += 1
+//    println("    %3d %s %s:%s (%s) -> %s" format (constCount, tpe, attrName, constName, value, c))
+    constCount += 1
 
     c match {
       case Some((const, _)) => const
@@ -198,7 +197,7 @@ object XmlAttribute {
 
       private val units = Map("px" -> "", "dip" -> "dip", "dp" -> "dip", "sp" -> "sp", "sip" -> "sp")
 
-      def isDefinedAt(x: String) = units.keys.exists(x.endsWith)
+      def isDefinedAt(str: String) = units.keys.exists(str.toLowerCase.endsWith)
 
       def apply(str: String): Property.Value = {
         val x = str.toLowerCase

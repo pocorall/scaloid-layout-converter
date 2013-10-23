@@ -1,5 +1,8 @@
 package org.scaloid.layout.converter
 
+import scala.language.existentials
+
+
 sealed trait AndroidConstant { def render: String }
 
 case class RawConstantValue(value: Any) extends AndroidConstant {
@@ -10,7 +13,7 @@ case class ConstantRef(name: String, declaringClass: Class[_], value: Any) exten
 
   def fqcn = declaringClass.getName +"."+ name
 
-  def render = name
+  def render = declaringClass.getSimpleName +"."+ name
 
   override def toString = s"${fqcn.replace("android.", "")}($value)"
 
@@ -103,22 +106,26 @@ object AndroidConstant {
   }
 
   private val adjustToken = (_: (String, String, String)) match {
+    case (_, "autoLink", word) => List("LINKIFY", word.toJavaConstFormat)
+    case (_, "ellipsize", word) => List("TRUNCATE", "AT", word)
+    case (_, "imeOptions", "NORMAL") => List("IME", "NULL")
+    case (_, "inputType", "NONE") => List("TYPE", "NULL")
+    case (_, "orientation", word) => List("LAYOUT", "PARAMS", word.toJavaConstFormat)
     case ("Animation", "zAdjustment", word) => List("ANIMATION", "ZORDER", word.toJavaConstFormat)
     case ("ProgressBar", "indeterminateBehavior", "REPEAT") => List("ANIMATION", "RESTART")
     case ("ProgressBar", "indeterminateBehavior", "CYCLE") => List("ANIMATION", "REVERSE")
-    case (_, "ellipsize", word) => List("TRUNCATE", "AT", word)
+    case ("ViewGroup", "persistentDrawingCache", "NONE") => List("NO", "CACHE")
     case (_, _, constName) => constName.tokenize
   }
 
-  private val highPriorityWords = Set(
-    "GRAVITY", "PERSISTENT", "GRADIENT", "SCROLLBARS", "FADING", "CACHE", "EDGE", "STREAM", "TRANSCRIPT", "ORDER", "ANIMATION",
-    "RINGTONE", "STREAM"
+  private val importantWords = Set(
+    "ANIMATION", "CACHE", "DRAWING", "EDGE", "FADING", "GRADIENT", "GRAVITY",
+    "ORDER", "PERSISTENT", "RINGTONE", "SCROLLBARS", "STREAM", "STREAM", "TRANSCRIPT"
   )
 
   // TODO black magic! rework for higher API versions than 8
   private val adjustPriority = (_: String) match {
-    case words if highPriorityWords(words) => 10
-    case "TYPE" | "MODE" => 1
+    case words if importantWords(words) => 12
     case _ => 2
   }
 
@@ -128,7 +135,12 @@ object AndroidConstant {
     case ("View", "scrollbars", _) => true
     case ("View", "fadingEdge", _) => true
 
+    // compound properties
+    case (_, "capitalize", _) => true
+    case (_, "textStyle", _) => true
+
     // not defined explicitly
+    case (_, "autoLink", "NONE") => true
     case (_, "ellipsize", "NONE") => true
     case ("BitmapDrawable", "tileMode", "DISABLED") => true
     case ("Searchable", _, _) => true
