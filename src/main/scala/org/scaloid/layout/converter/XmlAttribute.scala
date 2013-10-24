@@ -1,5 +1,7 @@
 package org.scaloid.layout.converter
 
+import org.scaloid.layout.converter.Property.Constants
+
 
 object XmlAttributes {
   import scala.xml._
@@ -9,41 +11,59 @@ object XmlAttributes {
 
   private def xmlUri = s"android-$apiVersion/data/res/values/attrs.xml" // TODO from more versions
 
+  private var attrCount = 0
   val byName: Map[String, XmlAttribute] = {
-    def nodeToAttr(node: Node): XmlAttribute = {
-      val name = (node \ "@name").text
+    def nodeToAttr(className: String, node: Node): XmlAttribute = {
+      val attrName = (node \ "@name").text
+
+      if (node.child.exists(Set("enum", "flag") contains _.label)) {
+//        println(s"\n[$attrCount] $className : $attrName")
+        attrCount += 1
+      }
 
       // TODO deduplicate
-      val enums = node.nonEmptyChildren.filter(_.label == "enum").map { enumTag => Enum.find(name, (enumTag \ "@name").text) }
-      val flags = node.nonEmptyChildren.filter(_.label == "flag") map { flagTag => Flag.find(name, (flagTag \ "@name").text) }
+      val enums = node.child.filter(_.label == "enum")
+        .map { tag => Enum.find(className, attrName, (tag \ "@name").text, (tag \ "@value").text) }
+
+      val flags = node.child.filter(_.label == "flag")
+        .map { tag => Flag.find(className, attrName, (tag \ "@name").text, (tag \ "@value").text) }
 
       val format = node \ "@format" match {
         case NodeSeq.Empty => Format.ResourceFormat
         case n => Format(n.text)
       }
 
-      new XmlAttribute(name, format, enums.toList, flags.toList)
+      new XmlAttribute(attrName, format, enums.toList, flags.toList)
     }
 
-    (XML.load(getClass.getClassLoader.getResource(xmlUri)) \\ "attr")
-      .view
-      .filter(tag => (tag \ "@format").nonEmpty || tag.child.nonEmpty)
-      .map(nodeToAttr)
+    val attrXml = XML.load(getClass.getClassLoader.getResource(xmlUri))
+    val topAttrs = attrXml \ "attr" map ("android" -> _)
+    val subAttrs = attrXml \ "declare-styleable" flatMap (ds => ds \ "attr" map ((ds \ "@name").text -> _))
+
+    (topAttrs.iterator ++ subAttrs.iterator)
+      .filter { case (_, tag) => (tag \ "@format").nonEmpty || tag.child.nonEmpty }
+      .map((nodeToAttr _).tupled)
       .map(a => a.name -> a)
       .toMap
   }
 }
 
 
-class XmlAttribute(val name: String, _format: XmlAttribute.Format, enums: List[XmlAttribute.Enum], flags: List[XmlAttribute.Flag]) {
-  import XmlAttribute._
-  import Format._
+case class XmlAttribute(name: String, format: XmlAttribute.Format, enums: List[XmlAttribute.Enum], flags: List[XmlAttribute.Flag]) {
 
-  private val format = _format orElse new EnumFormat(enums) orElse new FlagsFormat(flags)
+  private val consts: Map[String, AndroidConstant] =
+    (enums.map { e => e.name -> e.target } ++ flags.map { e => e.name -> e.target }).toMap
 
   val renderName: String = if (name.startsWith("layout_")) name.drop(7) else name
 
-  def parse(str: String) = format(str)
+  def parse(str: String) =
+    if (flags.nonEmpty)
+      Constants(str.split('|').toList.map(_.trim).map(consts.get _).flatten)
+    else
+      consts.get(str) match {
+        case Some(const) => Constants(const)
+        case None =>  format(str)
+      }
 }
 
 object XmlAttribute {
@@ -55,23 +75,40 @@ object XmlAttribute {
   def custom(name: String, format: Format = ResourceFormat, enums: List[Enum] = Nil, flags: List[Flag] = Nil) =
     new XmlAttribute(name, format, enums, flags)
 
-  case class Enum(name: String, target: String) {
-    def render = target
-  }
+  private var constCount = 0
+  private def lookup(tpe: String, className: String, attrName: String, constName: String, value: String): AndroidConstant = {
+    val c = AndroidConstant.findByNameValue(className, attrName, constName, value.parseIntMaybeHex)
 
-  object Enum {
-    def find(attrName: String, name: String): Enum = {
-      Enum(name, name.toJavaConstFormat)
+//    println("    %3d %s %s:%s (%s) -> %s" format (constCount, tpe, attrName, constName, value, c))
+    constCount += 1
+
+    c match {
+      case Some((const, _)) => const
+      case None => RawConstantValue(value.parseIntMaybeHex)
     }
   }
 
-  case class Flag(name: String, target: String) {
-    def render = target
+  case class Enum(name: String, target: AndroidConstant) {
+    def render = target.render
+  }
+
+  object Enum {
+    def find(className: String, attrName: String, name: String, value: String): Enum = {
+      val cName = name.toJavaConstFormat
+      val res = lookup("[ENUM]", className, attrName, cName, value)
+      Enum(name, res)
+    }
+  }
+
+  case class Flag(name: String, target: AndroidConstant) {
+    def render = target.render
   }
 
   object Flag {
-    def find(attrName: String, name: String): Flag = {
-      Flag(name, name.toJavaConstFormat)
+    def find(className: String, attrName: String, name: String, value: String): Flag = {
+      val cName = name.toJavaConstFormat
+      val res = lookup("[FLAG]", className, attrName, cName, value)
+      Flag(name, res)
     }
   }
 
@@ -160,7 +197,7 @@ object XmlAttribute {
 
       private val units = Map("px" -> "", "dip" -> "dip", "dp" -> "dip", "sp" -> "sp", "sip" -> "sp")
 
-      def isDefinedAt(x: String) = units.keys.exists(x.endsWith)
+      def isDefinedAt(str: String) = units.keys.exists(str.toLowerCase.endsWith)
 
       def apply(str: String): Property.Value = {
         val x = str.toLowerCase
@@ -171,16 +208,6 @@ object XmlAttribute {
         else
           throw new IllegalArgumentException("Illegal dimension format: "+ str)
       }
-    }
-
-    class EnumFormat(enums: List[Enum]) extends Format {
-      def isDefinedAt(x: String) = enums exists (_.name == x.toJavaConstFormat)
-      def apply(x: String) = Constants(x.toJavaConstFormat)
-    }
-
-    class FlagsFormat(enums: List[Flag]) extends Format {
-      def isDefinedAt(x: String) = enums exists (_.name == x.toJavaConstFormat)
-      def apply(x: String) = Constants(x.split('|').map(_.toJavaConstFormat).toList)
     }
   }
 }

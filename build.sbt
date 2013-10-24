@@ -21,13 +21,14 @@ resolvers ++= Seq(
 )
 
 val scaloidVersion = "2.3-8"
-val sprayVersion = "1.2-20130912"
-val akkaVersion = "2.2.1"
+val sprayVersion = "1.2-RC1"
+val akkaVersion = "2.2.3"
 
 libraryDependencies ++= Seq(
   "org.scaloid" %% "scaloid" % scaloidVersion,
   "com.google.android" % "android" % "2.2.1" withSources,
   "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+  "org.reflections" % "reflections" % "0.9.9-RC1",
   "org.apache.commons" % "commons-lang3" % "3.1",
   "io.spray" % "spray-http" % sprayVersion,
   "io.spray" % "spray-httpx" % sprayVersion,
@@ -36,9 +37,9 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor" % akkaVersion,
   "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
   "ch.qos.logback" % "logback-classic" % "1.0.13",
-  "org.eclipse.jetty" % "jetty-webapp" % "8.1.12.v20130726" % "container",
+  "org.eclipse.jetty" % "jetty-webapp" % "8.1.13.v20130916" % "container",
   "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016" artifacts Artifact("javax.servlet", "jar", "jar"),
-  "org.scalatest" %% "scalatest" % "2.0.M8" % "test",
+  "org.scalatest" %% "scalatest" % "2.0.RC2" % "test",
   "junit" % "junit" % "4.11" % "test"
 )
 

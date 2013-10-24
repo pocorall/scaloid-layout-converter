@@ -6,16 +6,20 @@ import org.apache.commons.lang3.StringEscapeUtils
 
 class StringUtils(val str: String) extends AnyVal {
 
-  def toJavaConstFormat = {
-    val sb = new StringBuilder
-    str.foreach { c =>
-      if (c.isUpper)
-        sb.append('_').append(c)
-      else
-        sb.append(c.toUpper)
+  def isJavaConstFormat = str.matches("[A-Z][A-Z_0-9]*[A-Z0-9]")
+
+  def toJavaConstFormat =
+    if (isJavaConstFormat) str
+    else {
+      val sb = new StringBuilder
+      str.foreach { c =>
+        if (c.isUpper)
+          sb.append('_').append(c)
+        else
+          sb.append(c.toUpper)
+      }
+      sb.result
     }
-    sb.result
-  }
 
   def underscored =
     if (str.isEmpty) ""
@@ -56,7 +60,16 @@ class StringUtils(val str: String) extends AnyVal {
         str.toLowerCase,
         throw new IllegalArgumentException("Unknown color: "+ str))
 
+  def parseIntMaybeHex =
+    if (str.startsWith("0x")) java.lang.Integer.parseInt(str.drop(2), 16)
+    else str.toInt
+
   def escaped = StringEscapeUtils.escapeJava(str)
+
+  def tokenize =
+    toJavaConstFormat
+      .replaceAll("_([A-Z])_", "_$1") // ex) FIT_X_Y => FIT_XY
+      .split('_').toList.filter(_.nonEmpty)
 }
 
 object StringUtils {

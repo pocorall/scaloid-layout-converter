@@ -2,12 +2,13 @@ package org.scaloid.layout.web
 
 import spray.http._
 import spray.http.MediaTypes._
-
+import spray.http.HttpCharsets._
 
 
 trait Views {
 
-  def index(original: Option[String] = None, converted: Option[String] = None) = renderHtmlWithDocType(indexHtml(original, converted))
+  def index(original: Option[String] = None, converted: Option[String] = None) =
+    renderHtmlWithDocType(indexHtml(original, converted))
 
   private def indexHtml(original: Option[String], converted: Option[String]) =
 <html>
@@ -37,7 +38,7 @@ trait Views {
 
       <div class="row">
         <h4>Paste Android XML layout here: </h4>
-        <form method="post" enctype="multipart/form-data">
+        <form method="post">
           <textarea name="source" class="col-xs-12" rows={original.fold("20")(_ => "10")}>{original.getOrElse("")}</textarea>
           <br/>
           <input type="submit" class="btn btn-primary btn-large btn-block"/>
@@ -80,7 +81,7 @@ trait Views {
   private def renderHtmlWithDocType(html: Node)= {
     val w = new java.io.StringWriter()
     XML.write(w, html, "UTF-8", xmlDecl = false, doctype = dtd.DocType("html", dtd.SystemID(""), Nil))
-    HttpEntity(`text/html`, w.toString)
+    HttpEntity(`text/html` withCharset `UTF-8`, w.toString)
   }
 
 

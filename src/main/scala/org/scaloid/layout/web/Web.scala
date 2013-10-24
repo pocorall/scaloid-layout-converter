@@ -8,7 +8,7 @@ import org.scaloid.layout.converter._
 class Web extends HttpServiceActor with Views with ActorLogging {
 
   def receive = runRoute {
-    path(Slash) {
+    path("") {
       get {
         complete(index())
       } ~
