@@ -4,7 +4,7 @@ description := "An Android layout converter from XML to Scaloid DSL"
 
 version := "0.4"
 
-scalaVersion := "2.10.2"
+scalaVersion := "2.10.3"
 
 organization := "org.scaloid"
 
@@ -20,8 +20,8 @@ resolvers ++= Seq(
   "spray nightlies" at "http://nightlies.spray.io"
 )
 
-val scaloidVersion = "2.3-8"
-val sprayVersion = "1.2-RC1"
+val scaloidVersion = "3.0-8"
+val sprayVersion = "1.2.0"
 val akkaVersion = "2.2.3"
 
 libraryDependencies ++= Seq(
