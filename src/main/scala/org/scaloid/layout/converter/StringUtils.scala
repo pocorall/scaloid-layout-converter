@@ -18,7 +18,7 @@ class StringUtils(val str: String) extends AnyVal {
         else
           sb.append(c.toUpper)
       }
-      sb.result
+      sb.result()
     }
 
   def underscored =
@@ -27,16 +27,16 @@ class StringUtils(val str: String) extends AnyVal {
       val sb = new StringBuilder
       val it = str.iterator
 
-      sb.append(it.next)
+      sb.append(it.next())
       while (it.hasNext) {
-        val c = it.next
+        val c = it.next()
         if (c.isUpper)
           sb.append('_').append(c.toLower)
         else
           sb.append(c)
       }
 
-      sb.result
+      sb.result()
     }
 
   def isNumeric = Try(str.toDouble).isSuccess

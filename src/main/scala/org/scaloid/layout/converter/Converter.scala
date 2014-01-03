@@ -11,7 +11,7 @@ object Converter {
   def apply(sourceStr: String): String =
     try renderWithWrappingMethod(convert(XML.loadString(sourceStr)))
     catch {
-      case e: Throwable => return e.getClass.getSimpleName + ": " + (e.getMessage)
+      case e: Throwable => return e.getClass.getSimpleName + ": " + e.getMessage
     }
 
   def renderWithWrappingMethod(view: View) = {
@@ -24,8 +24,7 @@ object Converter {
 
     s"""$importClause
        |
-       |override def onCreate(savedInstanceState: Bundle) {
-       |  super.onCreate(savedInstanceState)
+       |onCreate {
        |
        |${view.render("  ")}
        |}
