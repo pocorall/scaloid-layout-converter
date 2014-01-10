@@ -20,7 +20,7 @@ resolvers ++= Seq(
   "spray nightlies" at "http://nightlies.spray.io"
 )
 
-val scaloidVersion = "3.0-8"
+val scaloidVersion = "3.1-8-RC1"
 val sprayVersion = "1.2.0"
 val akkaVersion = "2.2.3"
 
