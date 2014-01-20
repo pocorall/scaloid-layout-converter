@@ -16,11 +16,10 @@ object Converter {
 
   def renderWithWrappingMethod(view: View) = {
     val importClause =
-      collectImports(view).toList
+      collectImports(view)
         .map(_.getName.replace("$", "."))
-        .sorted
         .map("import " + _)
-        .mkString("\n")
+        .toList.sorted.mkString("\n")
 
     s"""$importClause
        |
@@ -77,7 +76,7 @@ object Converter {
         acc ++
           (view.props ++ view.layoutParams).map(_.value).collect {
             case Constants(cs) => cs.collect {
-              case ConstantRef(_, cls, _) => cls
+              case ConstantRef(name, cls, _) if ! ConstantRef.isPredefined(cls, name) => cls
             }
           }.flatten
 
