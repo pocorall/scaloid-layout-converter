@@ -10,10 +10,13 @@ case class RawConstantValue(value: Any) extends AndroidConstant {
 }
 
 case class ConstantRef(name: String, declaringClass: Class[_], value: Any) extends AndroidConstant {
+  import ConstantRef._
 
   def fqcn = declaringClass.getName +"."+ name
 
-  def render = declaringClass.getSimpleName +"."+ name
+  def render =
+    if (predefined.get(declaringClass).exists(_.contains(name))) name
+    else declaringClass.getSimpleName +"."+ name
 
   override def toString = s"${fqcn.replace("android.", "")}($value)"
 
@@ -22,6 +25,14 @@ case class ConstantRef(name: String, declaringClass: Class[_], value: Any) exten
       case ConstantRef(name, cls, _) => cls == this.declaringClass && name == this.name
       case _ => false
     }
+}
+
+object ConstantRef {
+
+  private val predefined: Map[Class[_], Set[String]] = Map(
+    classOf[android.view.ViewGroup.LayoutParams] -> Set("FILL_PARENT", "MATCH_PARENT", "WRAP_CONTENT")
+  )
+
 }
 
 object AndroidConstant {
