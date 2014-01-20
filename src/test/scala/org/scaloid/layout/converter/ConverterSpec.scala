@@ -42,4 +42,24 @@ class ConverterSpec extends FunSpec with Matchers {
     }
   }
 
+  it ("converts TableLayout properly") {
+    val node =
+      <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                   android:layout_width="fill_parent" android:layout_height="fill_parent">
+        <TableRow android:layout_width="wrap_content" android:layout_height="wrap_content" android:padding="5dip">
+          <TextView android:text="Column 1" android:textAppearance="?android:attr/textAppearanceLarge"/>
+        </TableRow>
+      </TableLayout>
+
+    convert(node).render() should equal {
+      """contentView = new STableLayout {
+        |  this += new STableRow {
+        |    STextView("Column 1").textAppearance(android.R.attr.textAppearanceLarge)
+        |  }.<<.width(WRAP_CONTENT).height(WRAP_CONTENT).>>.padding(5 dip)
+        |}.<<.fill.>>
+      """.stripMargin.trim
+    }
+
+  }
+
 }

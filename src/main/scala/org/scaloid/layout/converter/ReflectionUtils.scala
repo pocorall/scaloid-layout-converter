@@ -7,6 +7,8 @@ object ReflectionUtils {
   import scala.reflect.runtime.universe.{Type => _, _} // `type Type` is defined in package object
   import scala.util.Try
 
+  private val layoutElemPostfixes = List("Layout", "Row")
+
   private val mirror = runtimeMirror(getClass.getClassLoader)
 
   private val sPrefix = "org.scaloid.common.S"
@@ -22,7 +24,9 @@ object ReflectionUtils {
 
     def isView = tpe <:< typeTag[android.view.View].tpe
 
-    def isLayout = tpe <:< typeTag[android.view.ViewGroup].tpe && tpe.typeConstructor.toString.endsWith("Layout")
+    def isLayout = // TODO find general solution
+      tpe <:< typeTag[android.view.ViewGroup].tpe &&
+      layoutElemPostfixes.exists(tpe.typeConstructor.toString.endsWith)
 
     def isWidget = isView && ! isLayout
 
@@ -47,10 +51,8 @@ object ReflectionUtils {
         case m if m.isMethod && m.asMethod.paramss.isEmpty => m.asMethod
       }.headOption
     }
-
-
-
   }
+
 
   implicit class MethodOps(val method: MethodSymbol) {
 
