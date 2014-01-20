@@ -14,7 +14,6 @@ class ConverterSpec extends FunSpec with Matchers {
     it ("should convert an example XML") {
       renderWithWrappingMethod(convert(Fixtures.xml1)) should equal (
         """import android.view.Gravity
-          |import android.view.ViewGroup.LayoutParams
           |
           |onCreate {
           |

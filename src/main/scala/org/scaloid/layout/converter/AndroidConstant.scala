@@ -15,7 +15,7 @@ case class ConstantRef(name: String, declaringClass: Class[_], value: Any) exten
   def fqcn = declaringClass.getName +"."+ name
 
   def render =
-    if (predefined.get(declaringClass).exists(_.contains(name))) name
+    if (isPredefined(declaringClass, name)) name
     else declaringClass.getSimpleName +"."+ name
 
   override def toString = s"${fqcn.replace("android.", "")}($value)"
@@ -29,9 +29,12 @@ case class ConstantRef(name: String, declaringClass: Class[_], value: Any) exten
 
 object ConstantRef {
 
-  private val predefined: Map[Class[_], Set[String]] = Map(
+  private val predefinedConstants: Map[Class[_], Set[String]] = Map(
     classOf[android.view.ViewGroup.LayoutParams] -> Set("FILL_PARENT", "MATCH_PARENT", "WRAP_CONTENT")
   )
+
+  def isPredefined(cls: Class[_], name: String) =
+    predefinedConstants.get(cls).exists(_ contains name)
 
 }
 
