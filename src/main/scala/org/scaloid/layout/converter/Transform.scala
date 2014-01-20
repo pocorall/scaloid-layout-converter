@@ -18,13 +18,19 @@ object Transform extends (View => View) {
 
   def transformCommon(view: View): View =
     (view.layoutParam("width"), view.layoutParam("height")) match {
-      case (Some(w), Some(h)) if isMatchParent(w) =>
-        if (isWrapContent(h))
-          view.withoutLayoutParams("width", "height")
-        else if (isMatchParent(h))
-          view.withoutLayoutParams("width", "height").prependLayoutParams(Property.custom("fill"))
-        else
-          view
+      case (Some(w), Some(h)) =>
+        (w.value, h.value) match {
+          case (MATCH_PARENT | FILL_PARENT, MATCH_PARENT | FILL_PARENT) =>
+            view.withoutLayoutParams("width", "height").prependLayoutParams(Property.custom("fill"))
+
+          case (MATCH_PARENT | FILL_PARENT, WRAP_CONTENT) =>
+            view.withoutLayoutParams("width", "height")
+
+          case (WRAP_CONTENT, WRAP_CONTENT) =>
+            view.withoutLayoutParams("width", "height").prependLayoutParams(Property.custom("wrap"))
+
+          case _ => view
+        }
 
       case _ => view
     }
@@ -70,8 +76,4 @@ object Transform extends (View => View) {
         }
       case _ => vg
     }
-
-  private def isMatchParent(prop: Property) = Seq(MATCH_PARENT, FILL_PARENT) contains prop.value
-
-  private def isWrapContent(prop: Property) = prop.value == WRAP_CONTENT
 }
