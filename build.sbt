@@ -20,9 +20,9 @@ resolvers ++= Seq(
   "spray nightlies" at "http://nightlies.spray.io"
 )
 
-val scaloidVersion = "3.1-8-RC1"
-val sprayVersion = "1.2.0"
-val akkaVersion = "2.2.3"
+val scaloidVersion = "3.2.1-8"
+val sprayVersion = "1.3.1"
+val akkaVersion = "2.3.0"
 
 libraryDependencies ++= Seq(
   "org.scaloid" %% "scaloid" % scaloidVersion,
