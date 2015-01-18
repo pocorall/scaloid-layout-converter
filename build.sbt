@@ -29,7 +29,7 @@ libraryDependencies ++= Seq(
   "com.google.android" % "android" % "2.3.3" withSources,
   "org.scala-lang" % "scala-reflect" % scalaVersion.value,
   "org.scala-lang.modules" %% "scala-xml" % "1.0.3",
-  "org.reflections" % "reflections" % "0.9.9-RC1",
+  "org.reflections" % "reflections" % "0.9.9",
   "org.apache.commons" % "commons-lang3" % "3.1",
   "io.spray" %% "spray-http" % sprayVersion,
   "io.spray" %% "spray-httpx" % sprayVersion,
@@ -37,19 +37,19 @@ libraryDependencies ++= Seq(
   "io.spray" %% "spray-servlet" % sprayVersion,
   "com.typesafe.akka" %% "akka-actor" % akkaVersion,
   "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
-  "ch.qos.logback" % "logback-classic" % "1.0.13",
-  "org.eclipse.jetty" % "jetty-webapp" % "8.1.13.v20130916" % "container",
+  "ch.qos.logback" % "logback-classic" % "1.1.2",
+  "org.eclipse.jetty" % "jetty-webapp" % "9.2.6.v20141205" % "container",
   "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016" artifacts Artifact("javax.servlet", "jar", "jar"),
   "org.scalatest" %% "scalatest" % "2.2.1" % "test",
-  "junit" % "junit" % "4.11" % "test"
+  "junit" % "junit" % "4.12" % "test"
 )
 
 seq(Revolver.settings: _*)
 
 seq(webSettings: _*)
 
-artifactPath in (Compile, packageWar) := {
-  (target in Compile).value / "dist" / (artifactPath in (Compile, packageWar)).value.getName
+artifactPath in(Compile, packageWar) := {
+  (target in Compile).value / "dist" / (artifactPath in(Compile, packageWar)).value.getName
 }
 
 fork in Test := true

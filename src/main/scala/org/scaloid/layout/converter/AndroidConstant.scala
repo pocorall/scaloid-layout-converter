@@ -3,20 +3,23 @@ package org.scaloid.layout.converter
 import scala.language.existentials
 
 
-sealed trait AndroidConstant { def render: String }
+sealed trait AndroidConstant {
+  def render: String
+}
 
 case class RawConstantValue(value: Any) extends AndroidConstant {
   def render = value.toString
 }
 
 case class ConstantRef(name: String, declaringClass: Class[_], value: Any) extends AndroidConstant {
+
   import ConstantRef._
 
-  def fqcn = declaringClass.getName +"."+ name
+  def fqcn = declaringClass.getName + "." + name
 
   def render =
     if (isPredefined(declaringClass, name)) name
-    else declaringClass.getSimpleName +"."+ name
+    else declaringClass.getSimpleName + "." + name
 
   override def toString = s"${fqcn.replace("android.", "")}($value)"
 
@@ -39,6 +42,7 @@ object ConstantRef {
 }
 
 object AndroidConstant {
+
   import StringUtils._
 
   def apply(cls: Class[_], name: String): AndroidConstant = {
@@ -69,11 +73,11 @@ object AndroidConstant {
 
       (initialMap /: tokensWithCandidates) { case (map, (token, consts)) =>
         (map /: consts) { (map2, const) =>
-          map2 updated (const, map(const) + tokenPriority(token))
+          map2 updated(const, map(const) + tokenPriority(token))
         }
       }.filter(_._2 > 100).toList match {
         case Nil => None
-        case cs => Some(cs.maxBy { case (const, score) => (score, - const.fqcn.length) })
+        case cs => Some(cs.maxBy { case (const, score) => (score, -const.fqcn.length)})
       }
     }
 
@@ -92,7 +96,7 @@ object AndroidConstant {
 
     // Not `reflections.getSubtypesOf` due to interfaces
     val classLoader = getClass.getClassLoader
-    val classes = reflections.getStore.getStoreMap.get("SubTypesScanner")
+    val classes = reflections.getStore.get("SubTypesScanner")
       .values.toArray.map(name => classLoader.loadClass(name.asInstanceOf[String])).toSet
 
     val consts =
@@ -115,7 +119,7 @@ object AndroidConstant {
 
     (initialMap /: (consts ++ enums)) { (idx, const) =>
       val tokens = const.declaringClass.getSimpleName.tokenize ++ const.name.tokenize
-      (idx /: tokens) { (idx2, token) => idx2 updated (token, idx2(token) + const) }
+      (idx /: tokens) { (idx2, token) => idx2 updated(token, idx2(token) + const)}
     }
   }
 
