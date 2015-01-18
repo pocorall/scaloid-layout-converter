@@ -2,9 +2,9 @@ name := "scaloid-layout-converter"
 
 description := "An Android layout converter from XML to Scaloid DSL"
 
-version := "0.4"
+version := "0.5"
 
-scalaVersion := "2.10.3"
+scalaVersion := "2.10.4"
 
 organization := "org.scaloid"
 
@@ -22,7 +22,7 @@ resolvers ++= Seq(
 
 val scaloidVersion = "3.2.1-8"
 val sprayVersion = "1.3.1"
-val akkaVersion = "2.3.0"
+val akkaVersion = "2.3.8"
 
 libraryDependencies ++= Seq(
   "org.scaloid" %% "scaloid" % scaloidVersion,
